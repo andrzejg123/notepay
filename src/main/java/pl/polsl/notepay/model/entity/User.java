@@ -4,10 +4,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import pl.polsl.notepay.model.BaseModel;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -28,9 +28,18 @@ public class User extends BaseModel {
     private String surname;
 
     @Column
+    private String description;
+
+    @Column
     private Boolean deleted;
 
     @Column
     private LocalDateTime createDate;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Charge> charges;
+
+    @ManyToMany(mappedBy = "users")
+    private List<Group> groups;
 
 }

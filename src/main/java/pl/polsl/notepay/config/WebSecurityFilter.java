@@ -4,6 +4,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import pl.polsl.notepay.util.AuthenticationUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -38,7 +39,7 @@ public class WebSecurityFilter extends BasicAuthenticationFilter {
 
     private UsernamePasswordAuthenticationToken getAuthentication(String token) {
         if (token != null) {
-            // parse the token.
+
             String email = AuthenticationUtils.getSubjectFromToken(token);
 
             if (email != null) {
