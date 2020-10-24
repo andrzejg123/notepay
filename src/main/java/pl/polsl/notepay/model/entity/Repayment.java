@@ -6,32 +6,29 @@ import lombok.NoArgsConstructor;
 import pl.polsl.notepay.model.BaseEntity;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import java.time.LocalDateTime;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
+@Table(name = "repayments")
 @Data
-@Table(name = "charges")
 @NoArgsConstructor
-public class Charge extends BaseEntity {
+public class Repayment extends BaseEntity {
 
     @Column(nullable = false)
-    @Min(0)
-    @Max(1)
-    private Double progressLevel;
+    private LocalDateTime repaymentDate;
 
     @Column(nullable = false)
-    private Double amount;
-
-    @Column(nullable = false)
-    @Min(0)
-    private Double involveLevel;
+    private Boolean cancelled;
 
     @ManyToOne(optional = false)
-    private User user;
+    private User initiator;
 
     @ManyToOne(optional = false)
-    private Payment payment;
+    private User recipient;
+
+    @OneToMany(mappedBy = "repayment")
+    private Set<ChargeRepayment> chargeRepayments;
 
 }

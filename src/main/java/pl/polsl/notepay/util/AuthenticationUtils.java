@@ -44,7 +44,6 @@ public class AuthenticationUtils {
         Token token = new Token();
         LocalDateTime expirationDate = LocalDateTime.now().plusSeconds(VALIDATION_TIME);
 
-        User user = getUserFromSubject(credentials.getUsername());
         token.setToken(
                 JWT.create()
                         .withIssuedAt(new Date())

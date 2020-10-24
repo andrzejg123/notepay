@@ -1,11 +1,11 @@
 package pl.polsl.notepay.model.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import pl.polsl.notepay.model.BaseModel;
+import lombok.*;
+import pl.polsl.notepay.model.BaseEntity;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -13,27 +13,30 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 @Data
-public class User extends BaseModel {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User extends BaseEntity {
 
-    @Column
+    @Column(nullable = false, unique = true)
     private String username;
 
-    @Column
+    @Column(nullable = false)
     private String password;
 
-    @Column
+    @Column(nullable = false)
     private String name;
 
-    @Column
+    @Column(nullable = false)
     private String surname;
 
     @Column
     private String description;
 
-    @Column
+    @Column(nullable = false)
     private Boolean deleted;
 
-    @Column
+    @Column(nullable = false)
     private LocalDateTime createDate;
 
     @OneToMany(mappedBy = "user")
@@ -41,5 +44,17 @@ public class User extends BaseModel {
 
     @ManyToMany(mappedBy = "users")
     private List<Group> groups;
+
+    @OneToMany(mappedBy = "user")
+    private List<GroupInvitation> groupInvitations;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Product> products;
+
+    @OneToMany(mappedBy = "initiator")
+    private List<Repayment> ownRepayments;
+
+    @OneToMany(mappedBy = "recipient")
+    private List<Repayment> givenRepayments;
 
 }

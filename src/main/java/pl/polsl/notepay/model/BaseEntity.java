@@ -8,7 +8,7 @@ import javax.persistence.*;
 @EqualsAndHashCode
 @Data
 @MappedSuperclass
-public abstract class BaseModel {
+public abstract class BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
