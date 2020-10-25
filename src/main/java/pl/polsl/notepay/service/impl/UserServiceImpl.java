@@ -3,6 +3,7 @@ package pl.polsl.notepay.service.impl;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.polsl.notepay.exception.ResourceNotFoundException;
 import pl.polsl.notepay.exception.WrongRequestException;
 import pl.polsl.notepay.model.dto.UserDto;
 import pl.polsl.notepay.model.entity.User;
@@ -34,5 +35,14 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         return new UserDto(userRepository.save(newUser));
+    }
+
+    @Override
+    public UserDto getUserByUsername(String username) {
+
+        User user = userRepository.findByUsername(username).orElseThrow(() ->
+                new ResourceNotFoundException("There is no user with such a username"));
+
+        return new UserDto(user);
     }
 }

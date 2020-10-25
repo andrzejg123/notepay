@@ -1,8 +1,6 @@
 package pl.polsl.notepay.model.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import pl.polsl.notepay.model.BaseEntity;
 
 import javax.persistence.*;
@@ -12,6 +10,8 @@ import javax.persistence.*;
 @Table(name = "group_invitations")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class GroupInvitation extends BaseEntity {
 
     @ManyToOne(optional = false)

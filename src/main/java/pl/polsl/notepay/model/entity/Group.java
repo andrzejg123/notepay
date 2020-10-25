@@ -1,8 +1,6 @@
 package pl.polsl.notepay.model.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import pl.polsl.notepay.model.BaseEntity;
 
 import javax.persistence.*;
@@ -14,6 +12,8 @@ import java.util.List;
 @Data
 @Table(name = "groups")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Group extends BaseEntity {
 
     @Column(nullable = false)

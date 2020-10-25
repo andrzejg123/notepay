@@ -4,10 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import pl.polsl.notepay.model.entity.Payment;
 
-import javax.persistence.Column;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,7 +45,9 @@ public class PaymentDto {
         this.membersNumber = payment.getMembersNumber();
         this.idState = payment.getState().getId();
         this.idGroup = payment.getGroup() != null ? payment.getGroup().getId() : null;
-        this.paymentParts = payment.getPaymentParts().stream().map(PaymentPartDto::new).collect(Collectors.toList());
+        this.paymentParts = payment.getPaymentParts() != null ?
+                payment.getPaymentParts().stream().map(PaymentPartDto::new).collect(Collectors.toList()) :
+                Collections.emptyList();
         this.charges = payment.getCharges().stream().map(ChargeDto::new).collect(Collectors.toList());
     }
 

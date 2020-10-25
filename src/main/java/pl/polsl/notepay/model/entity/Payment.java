@@ -1,8 +1,6 @@
 package pl.polsl.notepay.model.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import pl.polsl.notepay.model.BaseEntity;
 
 import javax.persistence.*;
@@ -17,6 +15,8 @@ import java.util.Set;
 @Data
 @Table(name = "payments")
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Payment extends BaseEntity {
 
     @Column(nullable = false)

@@ -6,4 +6,5 @@ public interface UserService {
 
     UserDto registerUser(UserDto user);
 
+    UserDto getUserByUsername(String username);
 }
