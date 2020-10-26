@@ -52,6 +52,14 @@ public class RestExceptionHandler
                 buildHeaders(), HttpStatus.UNAUTHORIZED, request);
     }
 
+    @ExceptionHandler(value = {NotAuthorizedActionException.class})
+    protected ResponseEntity<Object> handleNotAuthorized(RuntimeException ex, WebRequest request) {
+
+        return handleExceptionInternal(ex,
+                buildErrorResponse(HttpStatus.FORBIDDEN, request, ex),
+                buildHeaders(), HttpStatus.FORBIDDEN, request);
+    }
+
     @ExceptionHandler(value = {WrongRequestException.class})
     protected ResponseEntity<Object> handleWrongRequest(RuntimeException ex, WebRequest request) {
 
