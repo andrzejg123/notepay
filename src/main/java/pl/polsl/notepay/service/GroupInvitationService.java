@@ -9,4 +9,8 @@ public interface GroupInvitationService {
     GroupInvitationDto createGroupInvitation(GroupInvitationDto groupInvitationDto, String token);
 
     List<GroupInvitationDto> getOwnGroupInvitations(String token);
+
+    void acceptGroupInvitation(Long idGroupInvitation, String token);
+
+    void declineGroupInvitation(Long idGroupInvitation, String token);
 }

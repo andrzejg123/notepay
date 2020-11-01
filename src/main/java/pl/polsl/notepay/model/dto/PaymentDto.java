@@ -25,6 +25,8 @@ public class PaymentDto {
 
     private Double amount;
 
+    private Double ownerAmount;
+
     private Integer membersNumber;
 
     private Long idState;
@@ -42,6 +44,7 @@ public class PaymentDto {
         this.ownerInvolveLevel = payment.getOwnerInvolveLevel();
         this.ownerProgress = payment.getOwnerProgress();
         this.amount = payment.getAmount();
+        this.ownerAmount = payment.getOwnerAmount();
         this.membersNumber = payment.getMembersNumber();
         this.idState = payment.getState().getId();
         this.idGroup = payment.getGroup() != null ? payment.getGroup().getId() : null;

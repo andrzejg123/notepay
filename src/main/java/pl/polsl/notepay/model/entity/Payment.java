@@ -38,6 +38,9 @@ public class Payment extends BaseEntity {
     private Double amount;
 
     @Column(nullable = false)
+    private Double ownerAmount;
+
+    @Column(nullable = false)
     private Integer membersNumber;
 
     @ManyToOne(optional = false)

@@ -26,4 +26,18 @@ public class GroupInvitationController {
         return ResponseEntity.ok(groupInvitationService.getOwnGroupInvitations(token));
     }
 
+    @DeleteMapping(value = "/{idGroupInvitation}/accept")
+    public ResponseEntity<Void> acceptGroupInvitation(@RequestHeader("Authorization") String token,
+                                                      @PathVariable Long idGroupInvitation) {
+        groupInvitationService.acceptGroupInvitation(idGroupInvitation, token);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(value = "/{idGroupInvitation}/decline")
+    public ResponseEntity<Void> declineGroupInvitation(@RequestHeader("Authorization") String token,
+                                                      @PathVariable Long idGroupInvitation) {
+        groupInvitationService.declineGroupInvitation(idGroupInvitation, token);
+        return ResponseEntity.noContent().build();
+    }
+
 }

@@ -3,7 +3,9 @@ package pl.polsl.notepay.service.impl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.polsl.notepay.exception.NotAuthorizedActionException;
+import pl.polsl.notepay.exception.ResourceNotFoundException;
 import pl.polsl.notepay.exception.WrongRequestException;
+import pl.polsl.notepay.model.dto.DetailedGroupInvitationDto;
 import pl.polsl.notepay.model.dto.GroupInvitationDto;
 import pl.polsl.notepay.model.entity.Group;
 import pl.polsl.notepay.model.entity.GroupInvitation;
@@ -43,6 +45,9 @@ public class GroupInvitationServiceImpl implements GroupInvitationService {
         if(group.getUsers().contains(user))
             throw new WrongRequestException("This user already belongs to this group");
 
+        if(group.getGroupInvitations().stream().map(GroupInvitation::getUser).anyMatch(user::equals))
+            throw new WrongRequestException("This user is already sent an invitation");
+
         GroupInvitation groupInvitation = GroupInvitation.builder()
                 .user(user)
                 .group(group)
@@ -55,6 +60,39 @@ public class GroupInvitationServiceImpl implements GroupInvitationService {
     public List<GroupInvitationDto> getOwnGroupInvitations(String token) {
 
         User currentUser = authenticationUtils.getUserFromToken(token);
-        return currentUser.getGroupInvitations().stream().map(GroupInvitationDto::new).collect(Collectors.toList());
+        return currentUser.getGroupInvitations().stream().map(DetailedGroupInvitationDto::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public void acceptGroupInvitation(Long idGroupInvitation, String token) {
+        GroupInvitation groupInvitation = groupInvitationRepository
+                .findById(idGroupInvitation).orElseThrow(() ->
+                        new ResourceNotFoundException("There is no invitation with such an id."));
+
+        User currentUser = authenticationUtils.getUserFromToken(token);
+
+        if(!groupInvitation.getUser().equals(currentUser))
+            throw new NotAuthorizedActionException("This is not yours invitation");
+
+        Group group = groupInvitation.getGroup();
+        currentUser.getGroups().add(group);
+        group.getUsers().add(currentUser);
+        groupRepository.flush();
+        userRepository.flush();
+        groupInvitationRepository.delete(groupInvitation);
+    }
+
+    @Override
+    public void declineGroupInvitation(Long idGroupInvitation, String token) {
+        GroupInvitation groupInvitation = groupInvitationRepository
+                .findById(idGroupInvitation).orElseThrow(() ->
+                        new ResourceNotFoundException("There is no invitation with such an id."));
+
+        User currentUser = authenticationUtils.getUserFromToken(token);
+
+        if(!groupInvitation.getUser().equals(currentUser))
+            throw new NotAuthorizedActionException("This is not yours invitation");
+
+        groupInvitationRepository.delete(groupInvitation);
     }
 }
