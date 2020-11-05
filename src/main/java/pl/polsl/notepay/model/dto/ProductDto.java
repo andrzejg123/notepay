@@ -8,6 +8,8 @@ import pl.polsl.notepay.model.entity.Product;
 @NoArgsConstructor
 public class ProductDto {
 
+    Long id;
+
     String name;
 
     Double defaultValue;
@@ -15,6 +17,7 @@ public class ProductDto {
     Long idUser;
 
     public ProductDto(Product product) {
+        this.id = product.getId();
         this.name = product.getName();
         this.defaultValue = product.getDefaultValue();
         this.idUser = product.getUser().getId();

@@ -1,6 +1,7 @@
 package pl.polsl.notepay.model.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.polsl.notepay.model.entity.Payment;
 
@@ -9,45 +10,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-public class PaymentDto {
-
-    private Long id;
-
-    private LocalDateTime createDate;
-
-    private String description;
-
-    private Double ownerInvolveLevel;
-
-    private Double ownerProgress;
-
-    private Double amount;
-
-    private Double ownerAmount;
-
-    private Integer membersNumber;
-
-    private Long idState;
-
-    private Long idGroup;
+public class PaymentDto extends SimplePaymentDto {
 
     private List<PaymentPartDto> paymentParts;
 
     private List<ChargeDto> charges;
 
     public PaymentDto(Payment payment) {
-        this.id = payment.getId();
-        this.createDate = payment.getCreateDate();
-        this.description = payment.getDescription();
-        this.ownerInvolveLevel = payment.getOwnerInvolveLevel();
-        this.ownerProgress = payment.getOwnerProgress();
-        this.amount = payment.getAmount();
-        this.ownerAmount = payment.getOwnerAmount();
-        this.membersNumber = payment.getMembersNumber();
-        this.idState = payment.getState().getId();
-        this.idGroup = payment.getGroup() != null ? payment.getGroup().getId() : null;
+        super(payment);
         this.paymentParts = payment.getPaymentParts() != null ?
                 payment.getPaymentParts().stream().map(PaymentPartDto::new).collect(Collectors.toList()) :
                 Collections.emptyList();

@@ -5,15 +5,16 @@ import org.springframework.stereotype.Service;
 import pl.polsl.notepay.exception.ResourceNotFoundException;
 import pl.polsl.notepay.exception.WrongRequestException;
 import pl.polsl.notepay.model.dto.PaymentDto;
+import pl.polsl.notepay.model.dto.SimplePaymentDto;
 import pl.polsl.notepay.model.entity.*;
-import pl.polsl.notepay.repository.GroupRepository;
-import pl.polsl.notepay.repository.PaymentRepository;
-import pl.polsl.notepay.repository.UserRepository;
+import pl.polsl.notepay.model.enumeration.StateEnum;
+import pl.polsl.notepay.repository.*;
 import pl.polsl.notepay.service.PaymentService;
 import pl.polsl.notepay.util.AuthenticationUtils;
+import pl.polsl.notepay.util.DoubleUtil;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,14 +25,69 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final AuthenticationUtils authenticationUtils;
     private final PaymentRepository paymentRepository;
+    private final ProductRepository productRepository;
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
+    private final StateRepository stateRepository;
+    private final ChargeRepository chargeRepository;
+    private final PaymentPartRepository paymentPartRepository;
+
+    private List<PaymentPart> buildPaymentParts(User currentUser, Payment payment, PaymentDto paymentDto) {
+
+        if (paymentDto.getPaymentParts() != null && !paymentDto.getPaymentParts().isEmpty()) {
+
+            Set<Product> userProducts = productRepository.findByUser(currentUser);
+
+            final Double[] partsSum = {0.0d};
+            List<PaymentPart> paymentParts = paymentDto.getPaymentParts().stream().map(part -> {
+
+                partsSum[0] += part.getValue();
+                Product product = part.getIdProduct() == null ? null :
+                        userProducts.stream()
+                                .filter(it -> it.getId().equals(part.getIdProduct()))
+                                .findFirst()
+                                .orElseThrow(() -> new WrongRequestException("Wrong payment parts"));
+
+                return PaymentPart.builder()
+                        .value(part.getValue())
+                        .payment(payment)
+                        .product(product)
+                        .build();
+            }).collect(Collectors.toList());
+
+            if(!DoubleUtil.equals(partsSum[0], paymentDto.getAmount()))
+                throw new WrongRequestException("Wrong payment parts");
+
+            return paymentParts;
+        }
+
+        return Collections.emptyList();
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    private Set<Charge> buildCharges(Double normalizedAmount, List<User> paymentMembers,
+                                     Payment payment, PaymentDto paymentDto) {
+        return paymentDto.getCharges().stream()
+                .map(chargeDto ->
+                        Charge.builder()
+                                .amount(normalizedAmount * chargeDto.getInvolveLevel())
+                                .involveLevel(chargeDto.getInvolveLevel())
+                                .progressLevel(0.0)
+                                .payment(payment)
+                                .user(paymentMembers.stream()
+                                        .filter(it -> it.getId().equals(chargeDto.getIdUser()))
+                                        .findFirst()
+                                        .get()
+                                )
+                                .build()
+                ).collect(Collectors.toSet());
+    }
 
     @Override
     public PaymentDto createPayment(PaymentDto paymentDto, String token) {
         if (paymentDto.getDescription() == null || "".equals(paymentDto.getDescription()) ||
-                paymentDto.getOwnerInvolveLevel() == null || paymentDto.getOwnerInvolveLevel() < 0 ||
-                paymentDto.getAmount() == null || paymentDto.getAmount() < 0 || paymentDto.getCharges() == null ||
+                paymentDto.getOwnerInvolveLevel() == null || paymentDto.getOwnerInvolveLevel() < 0.0d ||
+                paymentDto.getAmount() == null || paymentDto.getAmount() < 0.0d || paymentDto.getCharges() == null ||
                 paymentDto.getCharges().isEmpty()) {
             throw new WrongRequestException("Required fields does not match requirements");
         }
@@ -45,60 +101,51 @@ public class PaymentServiceImpl implements PaymentService {
 
         User currentUser = authenticationUtils.getUserFromToken(token);
 
-        List<PaymentPart> paymentParts = new ArrayList<>();
-        if (paymentDto.getPaymentParts() != null && !paymentDto.getPaymentParts().isEmpty()) {
-
-            Set<Product> userProducts = currentUser.getProducts();
-            paymentParts = paymentDto.getPaymentParts().stream().map(part ->
-                    PaymentPart.builder()
-                            .value(part.getValue())
-                            .payment(payment)
-                            .product(
-                                userProducts.stream()
-                                        .filter(idProduct -> idProduct.getId().equals(part.getIdProduct()))
-                                        .findFirst()
-                                        .orElseThrow(() -> new WrongRequestException("Wrong payment parts"))
-                            ).build()
-            ).collect(Collectors.toList());
-        }
+        List<PaymentPart> paymentParts = buildPaymentParts(currentUser, payment, paymentDto);
 
         final Double[] totalInvolveLevel = {paymentDto.getOwnerInvolveLevel()};
-
-        List<Long> userIds = paymentDto.getCharges().stream()
+        List<Long> paymentMembersIds = paymentDto.getCharges().stream()
                 .map(chargeDto -> {
+                    if (chargeDto.getInvolveLevel() <= 0.0d)
+                        throw new WrongRequestException("Wrong involve levels");
+
                     totalInvolveLevel[0] += chargeDto.getInvolveLevel();
                     return chargeDto.getIdUser();
                 })
                 .collect(Collectors.toList());
 
-        Double normalizedMinimalAmount = paymentDto.getAmount() / totalInvolveLevel[0];
+        Double normalizedAmount = paymentDto.getAmount() / totalInvolveLevel[0];
+        final Double ownerAmount = normalizedAmount * paymentDto.getOwnerInvolveLevel();
 
-        List<User> users = userRepository.findAllById(userIds);
+        List<User> paymentMembers = userRepository.findAllById(paymentMembersIds);
+        if(paymentMembers.size() != paymentMembersIds.size() || paymentMembers.contains(currentUser))
+            throw new WrongRequestException("Wrong user ids");
 
-        Set<Charge> charges = paymentDto.getCharges().stream()
-                .map(chargeDto ->
-                        Charge.builder()
-                                .amount(normalizedMinimalAmount * chargeDto.getInvolveLevel())
-                                .involveLevel(chargeDto.getInvolveLevel())
-                                .progressLevel(0.0)
-                                .payment(payment)
-                                .user(users.stream()
-                                        .filter(it -> it.getId().equals(chargeDto.getIdUser()))
-                                        .findFirst()
-                                        .orElseThrow(() -> new WrongRequestException("Wrong user ids"))
-                                ).build()
-                ).collect(Collectors.toSet());
+        Set<Charge> charges = buildCharges(normalizedAmount, paymentMembers, payment, paymentDto);
 
         payment.setDescription(paymentDto.getDescription());
+        payment.setOwner(currentUser);
         payment.setAmount(paymentDto.getAmount());
+        payment.setOwnerProgress(0.0);
         payment.setCreateDate(LocalDateTime.now());
-        payment.setMembersNumber(userIds.size());
+        payment.setMembersNumber(paymentMembersIds.size());
         payment.setOwnerInvolveLevel(paymentDto.getOwnerInvolveLevel());
-        payment.setOwnerAmount(normalizedMinimalAmount * paymentDto.getOwnerInvolveLevel());
+        payment.setOwnerAmount(ownerAmount);
         payment.setGroup(group);
         payment.setPaymentParts(paymentParts);
         payment.setCharges(charges);
+        payment.setState(stateRepository.findByName(StateEnum.NEW));
 
         return new PaymentDto(paymentRepository.save(payment));
     }
+
+    @Override
+    public List<SimplePaymentDto> getOwnPayments(String token) {
+
+        List<Payment> payments = authenticationUtils.getUserFromToken(token)
+                .getPayments();
+
+        return payments.stream().map(SimplePaymentDto::new).collect(Collectors.toList());
+    }
+
 }

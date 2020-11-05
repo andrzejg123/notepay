@@ -7,9 +7,9 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "groups")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,7 +28,7 @@ public class Group extends BaseEntity {
     @Column(nullable = false)
     private Boolean deleted;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     private List<User> users;
 
     @OneToMany(mappedBy = "group")

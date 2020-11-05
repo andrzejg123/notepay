@@ -7,10 +7,10 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "repayments")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -22,10 +22,10 @@ public class Repayment extends BaseEntity {
     @Column(nullable = false)
     private Boolean cancelled;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private User initiator;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private User recipient;
 
     @OneToMany(mappedBy = "repayment")

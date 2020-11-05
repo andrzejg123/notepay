@@ -5,10 +5,10 @@ import pl.polsl.notepay.model.BaseEntity;
 
 import javax.persistence.*;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "group_invitations")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

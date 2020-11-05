@@ -7,9 +7,10 @@ import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(exclude = {"payment"}, callSuper = true)
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "charges")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,10 +29,11 @@ public class Charge extends BaseEntity {
     @Min(0)
     private Double involveLevel;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private User user;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id")
     private Payment payment;
 
 }

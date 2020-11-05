@@ -5,14 +5,13 @@ import pl.polsl.notepay.model.BaseEntity;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -56,5 +55,8 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "recipient")
     private List<Repayment> givenRepayments;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Payment> payments;
 
 }

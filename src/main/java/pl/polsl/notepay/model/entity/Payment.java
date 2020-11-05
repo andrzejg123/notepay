@@ -1,6 +1,8 @@
 package pl.polsl.notepay.model.entity;
 
 import lombok.*;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import pl.polsl.notepay.model.BaseEntity;
 
 import javax.persistence.*;
@@ -10,9 +12,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "payments")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -49,9 +51,12 @@ public class Payment extends BaseEntity {
     @ManyToOne
     private Group group;
 
-    @OneToMany(mappedBy = "payment")
+    @ManyToOne
+    private User owner;
+
+    @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     private Set<Charge> charges;
 
-    @OneToMany(mappedBy = "payment")
+    @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     private List<PaymentPart> paymentParts;
 }
