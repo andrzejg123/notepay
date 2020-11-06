@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import pl.polsl.notepay.exception.NotAuthenticatedException;
 import pl.polsl.notepay.model.auth.Credentials;
 import pl.polsl.notepay.model.auth.Token;
 import pl.polsl.notepay.model.entity.User;
@@ -28,7 +29,7 @@ public class AuthenticationUtils {
 
     private User getUserFromSubject(String username) {
         return userRepository.findByUsername(username).orElseThrow(() ->
-                new RuntimeException("Wrong token")
+                new NotAuthenticatedException("Wrong token")
         );
     }
 
@@ -36,8 +37,8 @@ public class AuthenticationUtils {
         if(token.startsWith("Bearer "))
             token = token.substring("Bearer ".length());
 
-        String emailName = getSubjectFromToken(token);
-        return getUserFromSubject(emailName);
+        String username = getSubjectFromToken(token);
+        return getUserFromSubject(username);
     }
 
     public Token getToken(Credentials credentials) {

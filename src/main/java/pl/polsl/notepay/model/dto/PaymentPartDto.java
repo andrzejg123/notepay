@@ -12,14 +12,14 @@ public class PaymentPartDto {
 
     private Long idPayment;
 
-    private Long idProduct;
+    private String name;
 
     private Double value;
 
     public PaymentPartDto(PaymentPart paymentPart) {
         this.id = paymentPart.getId();
         this.idPayment = paymentPart.getPayment().getId();
-        this.idProduct = paymentPart.getProduct() != null ? paymentPart.getProduct().getId() : null;
+        this.name = paymentPart.getName();
         this.value = paymentPart.getValue();
     }
 

@@ -32,26 +32,19 @@ public class PaymentServiceImpl implements PaymentService {
     private final ChargeRepository chargeRepository;
     private final PaymentPartRepository paymentPartRepository;
 
-    private List<PaymentPart> buildPaymentParts(User currentUser, Payment payment, PaymentDto paymentDto) {
+    private List<PaymentPart> buildPaymentParts(Payment payment, PaymentDto paymentDto) {
 
         if (paymentDto.getPaymentParts() != null && !paymentDto.getPaymentParts().isEmpty()) {
-
-            Set<Product> userProducts = productRepository.findByUser(currentUser);
 
             final Double[] partsSum = {0.0d};
             List<PaymentPart> paymentParts = paymentDto.getPaymentParts().stream().map(part -> {
 
                 partsSum[0] += part.getValue();
-                Product product = part.getIdProduct() == null ? null :
-                        userProducts.stream()
-                                .filter(it -> it.getId().equals(part.getIdProduct()))
-                                .findFirst()
-                                .orElseThrow(() -> new WrongRequestException("Wrong payment parts"));
 
                 return PaymentPart.builder()
                         .value(part.getValue())
                         .payment(payment)
-                        .product(product)
+                        .name(part.getName())
                         .build();
             }).collect(Collectors.toList());
 
@@ -101,7 +94,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         User currentUser = authenticationUtils.getUserFromToken(token);
 
-        List<PaymentPart> paymentParts = buildPaymentParts(currentUser, payment, paymentDto);
+        List<PaymentPart> paymentParts = buildPaymentParts(payment, paymentDto);
 
         final Double[] totalInvolveLevel = {paymentDto.getOwnerInvolveLevel()};
         List<Long> paymentMembersIds = paymentDto.getCharges().stream()

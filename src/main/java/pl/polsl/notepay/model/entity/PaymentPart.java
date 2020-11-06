@@ -15,13 +15,12 @@ import javax.persistence.*;
 public class PaymentPart extends BaseEntity {
 
     @Column
-    Double value;
+    private Double value;
+
+    @Column
+    private String name;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id")
     private Payment payment;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Product product;
 
 }
