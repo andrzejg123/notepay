@@ -68,4 +68,13 @@ public class UserServiceImpl implements UserService {
 
         return new UserDto(userRepository.save(currentUser));
     }
+
+    @Override
+    public UserDto getUserById(String token, Long idUser) {
+        authenticationUtils.getUserFromToken(token);
+        User user = userRepository.findById(idUser).orElseThrow(() ->
+                new ResourceNotFoundException("There is no user with such an id"));
+
+        return new UserDto(user);
+    }
 }

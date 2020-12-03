@@ -30,6 +30,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
+    @GetMapping(value = "/{idUser}")
+    public ResponseEntity<UserDto> getUserById(@ApiIgnore @RequestHeader("Authorization") String token,
+                                               @PathVariable Long idUser) {
+        return ResponseEntity.ok(userService.getUserById(token, idUser));
+    }
+
     @GetMapping(value = "/current")
     public ResponseEntity<UserDto> getCurrentUser(@ApiIgnore @RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(userService.getCurrentUser(token));

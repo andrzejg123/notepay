@@ -11,4 +11,5 @@ public interface PaymentService {
 
     List<SimplePaymentDto> getOwnPayments(String token);
 
+    PaymentDto getPaymentDetails(Long idPayment, String token);
 }

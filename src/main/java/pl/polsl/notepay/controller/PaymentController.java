@@ -28,4 +28,10 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getOwnPayments(token));
     }
 
+    @GetMapping(value = "/{idPayment}/details")
+    public ResponseEntity<PaymentDto> getOwnPayments(@ApiIgnore @RequestHeader("Authorization") String token,
+                                                           @PathVariable Long idPayment) {
+        return ResponseEntity.ok(paymentService.getPaymentDetails(idPayment, token));
+    }
+
 }

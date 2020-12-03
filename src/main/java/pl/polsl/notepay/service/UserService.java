@@ -11,4 +11,6 @@ public interface UserService {
     UserDto getCurrentUser(String token);
 
     UserDto updateUser(UserDto user, String token);
+
+    UserDto getUserById(String token, Long idUser);
 }

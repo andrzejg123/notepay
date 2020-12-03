@@ -2,6 +2,7 @@ package pl.polsl.notepay.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.polsl.notepay.exception.NotAuthorizedActionException;
 import pl.polsl.notepay.exception.ResourceNotFoundException;
 import pl.polsl.notepay.exception.WrongRequestException;
 import pl.polsl.notepay.model.dto.PaymentDto;
@@ -141,6 +142,19 @@ public class PaymentServiceImpl implements PaymentService {
                 .getPayments();
 
         return payments.stream().map(SimplePaymentDto::new).collect(Collectors.toList());
+    }
+
+    @Override
+    public PaymentDto getPaymentDetails(Long idPayment, String token) {
+        User currentUser = authenticationUtils.getUserFromToken(token);
+        Payment payment = paymentRepository.findById(idPayment).orElseThrow(() ->
+                new ResourceNotFoundException("There is no payment with such an id"));
+
+        if(!payment.getOwner().equals(currentUser)) {
+            throw new NotAuthorizedActionException("You are not authorized to get this payment's details");
+        }
+
+        return new PaymentDto(payment);
     }
 
 }
