@@ -6,7 +6,7 @@ import pl.polsl.notepay.model.enumeration.StateEnum;
 
 import javax.persistence.*;
 
-@Entity
+/*@Entity
 @Table(name = "states")
 @Getter
 @Setter
@@ -17,4 +17,4 @@ public class State extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     StateEnum name;
 
-}
+}*/

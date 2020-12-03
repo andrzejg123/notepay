@@ -9,6 +9,7 @@ import pl.polsl.notepay.model.dto.UserDto;
 import pl.polsl.notepay.model.entity.User;
 import pl.polsl.notepay.repository.UserRepository;
 import pl.polsl.notepay.service.UserService;
+import pl.polsl.notepay.util.AuthenticationUtils;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +19,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationUtils authenticationUtils;
 
     @Override
     public UserDto registerUser(UserDto user) {
@@ -44,5 +46,26 @@ public class UserServiceImpl implements UserService {
                 new ResourceNotFoundException("There is no user with such a username"));
 
         return new UserDto(user);
+    }
+
+    @Override
+    public UserDto getCurrentUser(String token) {
+        return new UserDto(authenticationUtils.getUserFromToken(token));
+    }
+
+    @Override
+    public UserDto updateUser(UserDto user, String token) {
+        User currentUser = authenticationUtils.getUserFromToken(token);
+        if(user.getName() != null && !user.getName().isEmpty())
+            currentUser.setName(user.getName());
+
+        if(user.getSurname() != null && !user.getSurname().isEmpty())
+            currentUser.setSurname(user.getSurname());
+
+        currentUser.setDescription(user.getDescription());
+        if(user.getPassword() != null && !user.getPassword().isEmpty())
+            currentUser.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        return new UserDto(userRepository.save(currentUser));
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.polsl.notepay.model.dto.GroupDto;
 import pl.polsl.notepay.service.GroupService;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
@@ -17,12 +18,12 @@ public class GroupController {
 
     @PostMapping
     public ResponseEntity<GroupDto> createGroup(@RequestBody GroupDto groupDto,
-                                                @RequestHeader("Authorization") String token) {
+                                                @ApiIgnore @RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(groupService.createGroup(groupDto, token));
     }
 
     @GetMapping(value = "/own")
-    public ResponseEntity<List<GroupDto>> getOwnGroups(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<GroupDto>> getOwnGroups(@ApiIgnore @RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(groupService.getOwnGroups(token));
     }
 

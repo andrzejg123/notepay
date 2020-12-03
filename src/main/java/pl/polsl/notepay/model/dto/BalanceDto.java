@@ -19,4 +19,6 @@ public class BalanceDto {
 
     private List<DetailedChargeDto> otherUserCharges;
 
+    private Double balanceSum;
+
 }

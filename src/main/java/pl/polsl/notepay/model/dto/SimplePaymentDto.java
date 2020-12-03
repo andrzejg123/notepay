@@ -26,6 +26,8 @@ public class SimplePaymentDto {
 
     private Integer membersNumber;
 
+    private Double totalProgress;
+
     private Long idState;
 
     private Long idGroup;
@@ -41,7 +43,8 @@ public class SimplePaymentDto {
         this.amount = payment.getAmount();
         this.ownerAmount = payment.getOwnerAmount();
         this.membersNumber = payment.getMembersNumber();
-        this.idState = payment.getState().getId();
+        this.totalProgress = payment.getTotalProgress();
+        //this.idState = payment.getState().getId();
         this.idGroup = payment.getGroup() != null ? payment.getGroup().getId() : null;
         this.idOwner = payment.getOwner().getId();
 

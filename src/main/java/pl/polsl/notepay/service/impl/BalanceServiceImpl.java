@@ -31,12 +31,14 @@ public class BalanceServiceImpl implements BalanceService {
         List<Payment> currentUserPayments = currentUser.getPayments();
         List<Payment> otherUserPayments = otherUser.getPayments();
 
+        final Double[] balanceSum = {0.0d};
         return BalanceDto.builder()
                 .idUser(otherUser.getId())
                 .currentUserCharges(
                         chargeRepository.findAllByPaymentInAndProgressLevelBeforeAndUser(otherUserPayments,
                                 1.0d, currentUser)
                                 .stream()
+                                .peek(charge -> balanceSum[0] -= charge.getAmount() * (1.0d - charge.getProgressLevel()))
                                 .map(DetailedChargeDto::new)
                                 .collect(Collectors.toList())
                 )
@@ -44,9 +46,11 @@ public class BalanceServiceImpl implements BalanceService {
                         chargeRepository.findAllByPaymentInAndProgressLevelBeforeAndUser(currentUserPayments,
                                 1.0d, otherUser)
                                 .stream()
+                                .peek(charge -> balanceSum[0] += charge.getAmount() * (1.0d - charge.getProgressLevel()))
                                 .map(DetailedChargeDto::new)
                                 .collect(Collectors.toList())
                 )
+                .balanceSum(balanceSum[0])
                 .build();
     }
 

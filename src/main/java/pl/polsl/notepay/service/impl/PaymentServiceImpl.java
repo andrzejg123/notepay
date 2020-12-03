@@ -28,7 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final ProductRepository productRepository;
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
-    private final StateRepository stateRepository;
+    //private final StateRepository stateRepository;
     private final ChargeRepository chargeRepository;
     private final PaymentPartRepository paymentPartRepository;
 
@@ -48,7 +48,7 @@ public class PaymentServiceImpl implements PaymentService {
                         .build();
             }).collect(Collectors.toList());
 
-            if(!DoubleUtil.equals(partsSum[0], paymentDto.getAmount()))
+            if (!DoubleUtil.equals(partsSum[0], paymentDto.getAmount()))
                 throw new WrongRequestException("Wrong payment parts");
 
             return paymentParts;
@@ -58,22 +58,23 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    private Set<Charge> buildCharges(Double normalizedAmount, List<User> paymentMembers,
+    private Set<Charge> buildCharges(Double totalInvolveLevel, List<User> paymentMembers,
                                      Payment payment, PaymentDto paymentDto) {
         return paymentDto.getCharges().stream()
-                .map(chargeDto ->
-                        Charge.builder()
-                                .amount(normalizedAmount * chargeDto.getInvolveLevel())
-                                .involveLevel(chargeDto.getInvolveLevel())
-                                .progressLevel(0.0)
-                                .payment(payment)
-                                .user(paymentMembers.stream()
-                                        .filter(it -> it.getId().equals(chargeDto.getIdUser()))
-                                        .findFirst()
-                                        .get()
-                                )
-                                .build()
-                ).collect(Collectors.toSet());
+                .map(chargeDto -> {
+                    final Double normalizedInvolveLevel = chargeDto.getInvolveLevel() / totalInvolveLevel;
+                    return Charge.builder()
+                            .amount(paymentDto.getAmount() * normalizedInvolveLevel)
+                            .involveLevel(normalizedInvolveLevel)
+                            .progressLevel(0.0d)
+                            .payment(payment)
+                            .user(paymentMembers.stream()
+                                    .filter(it -> it.getId().equals(chargeDto.getIdUser()))
+                                    .findFirst()
+                                    .get()
+                            )
+                            .build();
+                }).collect(Collectors.toSet());
     }
 
     @Override
@@ -107,27 +108,28 @@ public class PaymentServiceImpl implements PaymentService {
                 })
                 .collect(Collectors.toList());
 
-        Double normalizedAmount = paymentDto.getAmount() / totalInvolveLevel[0];
-        final Double ownerAmount = normalizedAmount * paymentDto.getOwnerInvolveLevel();
+        final Double ownerNormalizedInvolveLevel = paymentDto.getOwnerInvolveLevel() / totalInvolveLevel[0];
 
         List<User> paymentMembers = userRepository.findAllById(paymentMembersIds);
-        if(paymentMembers.size() != paymentMembersIds.size() || paymentMembers.contains(currentUser))
+        if (paymentMembers.size() != paymentMembersIds.size() || paymentMembers.contains(currentUser))
             throw new WrongRequestException("Wrong user ids");
 
-        Set<Charge> charges = buildCharges(normalizedAmount, paymentMembers, payment, paymentDto);
+        Set<Charge> charges = buildCharges(totalInvolveLevel[0], paymentMembers, payment, paymentDto);
 
         payment.setDescription(paymentDto.getDescription());
         payment.setOwner(currentUser);
         payment.setAmount(paymentDto.getAmount());
-        payment.setOwnerProgress(0.0);
+        payment.setOwnerProgress(0.0d);
         payment.setCreateDate(LocalDateTime.now());
-        payment.setMembersNumber(paymentMembersIds.size());
-        payment.setOwnerInvolveLevel(paymentDto.getOwnerInvolveLevel());
-        payment.setOwnerAmount(ownerAmount);
+        payment.setOwnerInvolveLevel(ownerNormalizedInvolveLevel);
+        payment.setMembersNumber(paymentMembersIds.size() + (payment.getOwnerInvolveLevel() > 0.0d ? 1 : 0));
+        payment.setOwnerAmount(paymentDto.getAmount() * ownerNormalizedInvolveLevel);
+        payment.setTotalProgress(0.0d);
         payment.setGroup(group);
         payment.setPaymentParts(paymentParts);
         payment.setCharges(charges);
-        payment.setState(stateRepository.findByName(StateEnum.NEW));
+        payment.setDeleted(false);
+        //payment.setState(stateRepository.findByName(StateEnum.NEW));
 
         return new PaymentDto(paymentRepository.save(payment));
     }

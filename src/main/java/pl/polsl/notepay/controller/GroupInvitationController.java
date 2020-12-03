@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.polsl.notepay.model.dto.GroupInvitationDto;
 import pl.polsl.notepay.service.GroupInvitationService;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
@@ -17,12 +18,12 @@ public class GroupInvitationController {
 
     @PostMapping
     public ResponseEntity<GroupInvitationDto> createGroupInvitation(@RequestBody GroupInvitationDto groupInvitationDto,
-                                                                    @RequestHeader("Authorization") String token) {
+                                                                    @ApiIgnore @RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(groupInvitationService.createGroupInvitation(groupInvitationDto, token));
     }
 
     @GetMapping(value = "/own")
-    public ResponseEntity<List<GroupInvitationDto>> getOwnGroupInvitations(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<GroupInvitationDto>> getOwnGroupInvitations(@ApiIgnore @RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(groupInvitationService.getOwnGroupInvitations(token));
     }
 

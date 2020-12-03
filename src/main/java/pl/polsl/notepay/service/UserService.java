@@ -7,4 +7,8 @@ public interface UserService {
     UserDto registerUser(UserDto user);
 
     UserDto getUserByUsername(String username);
+
+    UserDto getCurrentUser(String token);
+
+    UserDto updateUser(UserDto user, String token);
 }

@@ -1,8 +1,6 @@
 package pl.polsl.notepay.model.entity;
 
 import lombok.*;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import pl.polsl.notepay.model.BaseEntity;
 
 import javax.persistence.*;
@@ -45,8 +43,14 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private Integer membersNumber;
 
-    @ManyToOne(optional = false)
-    private State state;
+    @Column(nullable = false)
+    private Double totalProgress;
+
+    //@ManyToOne(optional = false)
+    //private State state;
+
+    @Column(nullable = false)
+    private Boolean deleted;
 
     @ManyToOne
     private Group group;

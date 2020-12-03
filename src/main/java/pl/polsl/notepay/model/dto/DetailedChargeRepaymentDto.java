@@ -6,19 +6,14 @@ import pl.polsl.notepay.model.entity.ChargeRepayment;
 
 @Data
 @NoArgsConstructor
-public class DetailedChargeRepaymentDto {
-
-    private Long id;
-
-    private Double progressDelta;
+public class DetailedChargeRepaymentDto extends ChargeRepaymentDto {
 
     private Double chargeAmount;
 
     private String paymentDescription;
 
     public DetailedChargeRepaymentDto(ChargeRepayment chargeRepayment) {
-        this.id = chargeRepayment.getId();
-        this.progressDelta = chargeRepayment.getProgressDelta();
+        super(chargeRepayment);
         this.chargeAmount = chargeRepayment.getCharge().getAmount();
         this.paymentDescription = chargeRepayment.getCharge().getPayment().getDescription();
     }

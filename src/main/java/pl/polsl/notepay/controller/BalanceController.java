@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.polsl.notepay.model.dto.BalanceDto;
 import pl.polsl.notepay.service.BalanceService;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
@@ -16,13 +17,13 @@ public class BalanceController {
     private final BalanceService balanceService;
 
     @GetMapping(value = "/user")
-    public ResponseEntity<BalanceDto> getBalanceWithUser(@RequestHeader("Authorization") String token,
+    public ResponseEntity<BalanceDto> getBalanceWithUser(@ApiIgnore @RequestHeader("Authorization") String token,
                                                          @RequestParam("idUser") Long idUser) {
         return ResponseEntity.ok(balanceService.getBalanceWithUser(idUser, token));
     }
 
     @GetMapping(value = "/group")
-    public ResponseEntity<List<BalanceDto>> getBalanceWithGroupMembers(@RequestHeader("Authorization") String token,
+    public ResponseEntity<List<BalanceDto>> getBalanceWithGroupMembers(@ApiIgnore @RequestHeader("Authorization") String token,
                                                                        @RequestParam("idGroup") Long idGroup) {
         return ResponseEntity.ok(balanceService.getBalanceWithGroupMembers(idGroup, token));
     }

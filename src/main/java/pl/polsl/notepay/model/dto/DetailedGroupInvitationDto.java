@@ -1,9 +1,11 @@
 package pl.polsl.notepay.model.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import pl.polsl.notepay.model.entity.GroupInvitation;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 public class DetailedGroupInvitationDto extends GroupInvitationDto {
